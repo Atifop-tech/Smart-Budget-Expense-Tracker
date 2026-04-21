@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # saad_project_2
 
 A new Flutter project.
@@ -15,3 +16,6 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# Smart-Budget-Expense-Tracker
+>>>>>>> 16e6a2c804dbf477a98e69a268e9c693be2d15d6

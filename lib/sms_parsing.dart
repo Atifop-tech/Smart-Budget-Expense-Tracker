@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:telephony/telephony.dart';
+import 'package:saad_project_2/api_service.dart';
 import 'package:saad_project_2/homePage.dart';
+import 'package:telephony/telephony.dart';
+
 import 'transaction_notifier.dart';
-import 'api_service.dart';
 
 @pragma('vm:entry-point')
 void backgroundMessageHandler(SmsMessage message) {
-  debugPrint("📩 Background SMS: ${message.body}");
+  debugPrint('Background SMS: ${message.body}');
 }
 
 class SmsParsing extends StatefulWidget {
@@ -19,22 +20,20 @@ class SmsParsing extends StatefulWidget {
 class _SmsParsingState extends State<SmsParsing> {
   final Telephony telephony = Telephony.instance;
 
-  int textReceived = 0;
-
   final List<String> financialKeywords = [
-    "debited",
-    "credited",
-    "transaction",
-    "payment",
-    "paid",
-    "received",
-    "balance",
-    "withdrawn",
-    "deposit",
-    "upi",
-    "account",
-    "spent",
-    "txn",
+    'debited',
+    'credited',
+    'transaction',
+    'payment',
+    'paid',
+    'received',
+    'balance',
+    'withdrawn',
+    'deposit',
+    'upi',
+    'account',
+    'spent',
+    'txn',
   ];
 
   final RegExp currencyRegex = RegExp(
@@ -44,86 +43,82 @@ class _SmsParsingState extends State<SmsParsing> {
 
   bool isFinancialMessage(String message) {
     final lower = message.toLowerCase();
-
     final hasAmount = currencyRegex.hasMatch(message);
-
-    final hasKeyword = financialKeywords.any((k) => lower.contains(k));
-
-    final isSpam = lower.contains("offer") ||
-        lower.contains("cashback") ||
-        lower.contains("win") ||
-        lower.contains("prize");
+    final hasKeyword = financialKeywords.any((keyword) => lower.contains(keyword));
+    final isSpam = lower.contains('offer') ||
+        lower.contains('cashback') ||
+        lower.contains('win') ||
+        lower.contains('prize');
 
     return hasAmount && hasKeyword && !isSpam;
   }
 
-  void _initSmsListener() async {
-    bool? granted = await telephony.requestPhoneAndSmsPermissions;
-    debugPrint("📱 Permission: $granted");
-    
-    if (granted != null && granted) {
+  Future<void> _initSmsListener() async {
+    final granted = await telephony.requestPhoneAndSmsPermissions;
+    if (granted ?? false) {
       listenSms();
     } else {
-      debugPrint("❌ SMS Permission Denied!");
+      debugPrint('SMS permission denied.');
     }
   }
 
   void listenSms() {
-    debugPrint("🔥 SMS Listener Started");
     telephony.listenIncomingSms(
       onNewMessage: (SmsMessage message) async {
-        String sms = message.body ?? "";
-        debugPrint("📩 Raw SMS: $sms");
-
+        final sms = message.body ?? '';
         if (!isFinancialMessage(sms)) return;
 
-        // 🔹 Extract amount
-        final RegExp amountRegex = RegExp(
+        final amountRegex = RegExp(
           r'(₹|Rs\.?|INR)\s?([\d,]+(\.\d+)?)',
           caseSensitive: false,
         );
 
-        Match? match = amountRegex.firstMatch(sms);
+        final match = amountRegex.firstMatch(sms);
+        final amount =
+            double.tryParse(match?.group(2)?.replaceAll(',', '') ?? '0')?.toInt() ?? 0;
 
-        int amount =
-            double.tryParse(match?.group(2)?.replaceAll(",", "") ?? "0")?.toInt() ?? 0;
-
-        String category = "Others";
-        String typeString = "debit";
+        var category = 'Others';
+        var typeString = 'debit';
 
         try {
-          // 🔥 CALL ML API
           final result = await ApiService.predict(sms);
-
-          category = result["category"] ?? "Others";
-          typeString = result["type"] ?? "debit";
-          debugPrint("✅ API Success - Category: $category, Type: $typeString");
-        } catch (e) {
-          debugPrint("❌ API Error (Fallback to default): $e");
+          category = result['category'] ?? 'Others';
+          typeString = result['type'] ?? 'debit';
+        } catch (_) {
+          debugPrint('Prediction API unavailable. Using fallback classification.');
         }
 
-        // 🔹 Convert string → enum
-        TransactionStatus type = typeString == "credit"
+        final type = typeString == 'credit'
             ? TransactionStatus.credited
             : TransactionStatus.debited;
 
-        if (mounted) {
-          setState(() {
-            textReceived = amount;
-          });
-
-          TransactionNotifier.instance.addTransaction(
-            amount,
-            type,
-            category,
-            purpose: "SMS",
-          );
-
-          debugPrint("✅ SMS Added Locally: $sms");
-        }
+        TransactionNotifier.instance.addTransaction(
+          amount,
+          type,
+          category,
+          purpose: _extractPurpose(sms, type),
+          source: 'SMS',
+        );
       },
       listenInBackground: false,
     );
+  }
+
+  String _extractPurpose(String sms, TransactionStatus type) {
+    final clean = sms.replaceAll(RegExp(r'\s+'), ' ').trim();
+    final merchantMatch = RegExp(
+      r'(?:to|from|at)\s+([A-Za-z0-9&\-. ]{3,30})',
+      caseSensitive: false,
+    ).firstMatch(clean);
+
+    if (merchantMatch != null) {
+      final merchant = merchantMatch.group(1)?.trim();
+      if (merchant != null && merchant.isNotEmpty) {
+        return merchant;
+      }
+    }
+
+    return type == TransactionStatus.credited ? 'Incoming payment' : 'Card / UPI payment';
   }
 
   @override
@@ -134,6 +129,6 @@ class _SmsParsingState extends State<SmsParsing> {
 
   @override
   Widget build(BuildContext context) {
-    return Homepage();
+    return const Homepage();
   }
 }

@@ -40,7 +40,7 @@ class _HistoryState extends State<History> {
               child: Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.76),
+                  color: Colors.white.withValues(alpha: 0.76),
                   borderRadius: BorderRadius.circular(28),
                 ),
                 child: Column(
@@ -72,7 +72,8 @@ class _HistoryState extends State<History> {
                             const SizedBox(width: 8),
                             _TypeFilterChip(
                               label: 'Expense',
-                              selected: _selectedType == TransactionStatus.debited,
+                              selected:
+                                  _selectedType == TransactionStatus.debited,
                               onTap: () {
                                 setState(() {
                                   _selectedType = TransactionStatus.debited;
@@ -82,7 +83,8 @@ class _HistoryState extends State<History> {
                             const SizedBox(width: 8),
                             _TypeFilterChip(
                               label: 'Income',
-                              selected: _selectedType == TransactionStatus.credited,
+                              selected:
+                                  _selectedType == TransactionStatus.credited,
                               onTap: () {
                                 setState(() {
                                   _selectedType = TransactionStatus.credited;
@@ -137,8 +139,8 @@ class _HistoryState extends State<History> {
                   Text(
                     'Net ${_formatCurrency(notifier.total)}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFF5F6B7A),
-                        ),
+                      color: const Color(0xFF5F6B7A),
+                    ),
                   ),
                 ],
               ),
@@ -151,9 +153,8 @@ class _HistoryState extends State<History> {
                         child: Text(
                           'No transactions match the current filters.',
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: const Color(0xFF64748B),
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: const Color(0xFF64748B)),
                         ),
                       ),
                     )
@@ -172,11 +173,17 @@ class _HistoryState extends State<History> {
                                 borderRadius: BorderRadius.circular(28),
                               ),
                               alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.symmetric(horizontal: 24),
-                              child: const Icon(Icons.delete_rounded, color: Colors.white),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                              ),
+                              child: const Icon(
+                                Icons.delete_rounded,
+                                color: Colors.white,
+                              ),
                             ),
                             direction: DismissDirection.endToStart,
-                            onDismissed: (_) => notifier.deleteTransaction(tx.id),
+                            onDismissed: (_) =>
+                                notifier.deleteTransaction(tx.id),
                             child: _TransactionCard(
                               transaction: tx,
                               onEdit: () => _showEditDialog(context, tx),
@@ -193,7 +200,6 @@ class _HistoryState extends State<History> {
   }
 
   Future<void> _showEditDialog(BuildContext context, Transaction tx) async {
-    final navigator = Navigator.of(context);
     final purposeController = TextEditingController(text: tx.purpose);
     final amountController = TextEditingController(text: tx.amount.toString());
     String selectedCategory = tx.category;
@@ -201,7 +207,7 @@ class _HistoryState extends State<History> {
 
     final updatedTransaction = await showDialog<_PendingTransactionUpdate>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
@@ -244,7 +250,7 @@ class _HistoryState extends State<History> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
-                      value: selectedCategory,
+                      initialValue: selectedCategory,
                       decoration: const InputDecoration(labelText: 'Category'),
                       items: categories
                           .map(
@@ -266,7 +272,7 @@ class _HistoryState extends State<History> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => Navigator.of(dialogContext).pop(),
                   child: const Text('Cancel'),
                 ),
                 FilledButton(
@@ -274,7 +280,7 @@ class _HistoryState extends State<History> {
                     final amount = int.tryParse(amountController.text.trim());
                     if (amount == null || amount <= 0) return;
 
-                    navigator.pop(
+                    Navigator.of(dialogContext).pop(
                       _PendingTransactionUpdate(
                         purpose: purposeController.text,
                         amount: amount,
@@ -295,15 +301,15 @@ class _HistoryState extends State<History> {
     purposeController.dispose();
     amountController.dispose();
 
-    if (updatedTransaction != null) {
-      notifier.updateTransaction(
-        id: tx.id,
-        purpose: updatedTransaction.purpose,
-        amount: updatedTransaction.amount,
-        type: updatedTransaction.type,
-        category: updatedTransaction.category,
-      );
-    }
+    if (!context.mounted || updatedTransaction == null) return;
+
+    notifier.updateTransaction(
+      id: tx.id,
+      purpose: updatedTransaction.purpose,
+      amount: updatedTransaction.amount,
+      type: updatedTransaction.type,
+      category: updatedTransaction.category,
+    );
   }
 }
 
@@ -322,10 +328,7 @@ class _PendingTransactionUpdate {
 }
 
 class _TransactionCard extends StatelessWidget {
-  const _TransactionCard({
-    required this.transaction,
-    required this.onEdit,
-  });
+  const _TransactionCard({required this.transaction, required this.onEdit});
 
   final Transaction transaction;
   final VoidCallback onEdit;
@@ -339,9 +342,9 @@ class _TransactionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.78),
+        color: Colors.white.withValues(alpha: 0.78),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withOpacity(0.58)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.58)),
       ),
       child: Row(
         children: [
@@ -374,8 +377,8 @@ class _TransactionCard extends StatelessWidget {
                 Text(
                   '${transaction.category} • ${transaction.source} • ${_formatDate(transaction.time)}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF64748B),
-                      ),
+                    color: const Color(0xFF64748B),
+                  ),
                 ),
               ],
             ),
@@ -423,15 +426,13 @@ class _TypeFilterChip extends StatelessWidget {
       selected: selected,
       onSelected: (_) => onTap(),
       selectedColor: const Color(0xFFCCFBF1),
-      backgroundColor: Colors.white.withOpacity(0.8),
+      backgroundColor: Colors.white.withValues(alpha: 0.8),
       labelStyle: TextStyle(
         color: selected ? const Color(0xFF115E59) : const Color(0xFF475569),
         fontWeight: FontWeight.w600,
       ),
       side: BorderSide.none,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
     );
   }
 }

@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
           scrolledUnderElevation: 0,
         ),
         cardTheme: CardThemeData(
-          color: Colors.white.withOpacity(0.74),
+          color: Colors.white.withValues(alpha: 0.74),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.white.withOpacity(0.82),
+          fillColor: Colors.white.withValues(alpha: 0.82),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,

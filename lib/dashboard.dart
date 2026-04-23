@@ -117,9 +117,8 @@ class DashboardPage extends StatelessWidget {
                               const SizedBox(height: 4),
                               Text(
                                 notifier.budgetStatusDescription,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: const Color(0xFF5F6B7A),
-                                    ),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(color: const Color(0xFF5F6B7A)),
                               ),
                             ],
                           ),
@@ -163,8 +162,8 @@ class DashboardPage extends StatelessWidget {
                   Text(
                     '${(notifier.rawBudgetProgress * 100).toStringAsFixed(0)}% of monthly target used',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF64748B),
-                        ),
+                      color: const Color(0xFF64748B),
+                    ),
                   ),
                   const SizedBox(height: 14),
                   Row(
@@ -180,7 +179,9 @@ class DashboardPage extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: _MetricPill(
-                          label: notifier.isOverBudget ? 'Over budget' : 'Remaining',
+                          label: notifier.isOverBudget
+                              ? 'Over budget'
+                              : 'Remaining',
                           value: _formatCurrency(
                             notifier.isOverBudget
                                 ? notifier.overBudgetAmount
@@ -204,11 +205,17 @@ class DashboardPage extends StatelessWidget {
               title: 'Category breakdown',
               subtitle: 'Where your money is going this cycle',
               child: categoryData.isEmpty
-                  ? const _EmptyState(message: 'Add expenses to reveal spending categories.')
+                  ? const _EmptyState(
+                      message: 'Add expenses to reveal spending categories.',
+                    )
                   : Column(
                       children: categoryData.entries.map((entry) {
-                        final highest = categoryData.values.reduce(math.max).toDouble();
-                        final progress = highest == 0 ? 0.0 : entry.value / highest;
+                        final highest = categoryData.values
+                            .reduce(math.max)
+                            .toDouble();
+                        final progress = highest == 0
+                            ? 0.0
+                            : entry.value / highest;
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 14),
                           child: Column(
@@ -219,7 +226,9 @@ class DashboardPage extends StatelessWidget {
                                   const Spacer(),
                                   Text(
                                     _formatCurrency(entry.value),
-                                    style: const TextStyle(fontWeight: FontWeight.w700),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -230,9 +239,10 @@ class DashboardPage extends StatelessWidget {
                                   minHeight: 10,
                                   value: progress,
                                   backgroundColor: const Color(0xFFF1F5F9),
-                                  valueColor: const AlwaysStoppedAnimation<Color>(
-                                    Color(0xFF0F766E),
-                                  ),
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                        Color(0xFF0F766E),
+                                      ),
                                 ),
                               ),
                             ],
@@ -246,23 +256,34 @@ class DashboardPage extends StatelessWidget {
               title: 'Weekly spending rhythm',
               subtitle: 'Last 7 days of expenses',
               child: weeklyData.values.every((amount) => amount == 0)
-                  ? const _EmptyState(message: 'Your last 7 days are clear. New expenses will appear here.')
+                  ? const _EmptyState(
+                      message:
+                          'Your last 7 days are clear. New expenses will appear here.',
+                    )
                   : SizedBox(
                       height: 170,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: weeklyData.entries.map((entry) {
-                          final maxValue = weeklyData.values.reduce(math.max).toDouble();
-                          final ratio = maxValue == 0 ? 0.0 : entry.value / maxValue;
+                          final maxValue = weeklyData.values
+                              .reduce(math.max)
+                              .toDouble();
+                          final ratio = maxValue == 0
+                              ? 0.0
+                              : entry.value / maxValue;
                           return Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   Text(
                                     entry.value == 0 ? '-' : '₹${entry.value}',
-                                    style: Theme.of(context).textTheme.labelSmall,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelSmall,
                                   ),
                                   const SizedBox(height: 8),
                                   AnimatedContainer(
@@ -333,10 +354,13 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Future<void> _showBudgetEditor(BuildContext context, TransactionNotifier notifier) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
-    final controller = TextEditingController(text: notifier.monthlyBudget.toString());
+  Future<void> _showBudgetEditor(
+    BuildContext context,
+    TransactionNotifier notifier,
+  ) async {
+    final controller = TextEditingController(
+      text: notifier.monthlyBudget.toString(),
+    );
     String? errorText;
     int previewBudget = notifier.monthlyBudget;
     final presetBudgets = <int>[
@@ -345,19 +369,19 @@ class DashboardPage extends StatelessWidget {
       25000,
       40000,
       math.max(notifier.spentThisMonth, 5000),
-    ].toSet().toList()
-      ..sort();
+    ].toSet().toList()..sort();
 
     final updatedBudget = await showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
+      builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
             final previewRemaining = previewBudget - notifier.spentThisMonth;
-            final previewOverBudget =
-                previewRemaining < 0 ? previewRemaining.abs() : 0;
+            final previewOverBudget = previewRemaining < 0
+                ? previewRemaining.abs()
+                : 0;
             final previewDailyAllowance = _calculateDailyAllowance(
               previewRemaining < 0 ? 0 : previewRemaining,
             );
@@ -385,232 +409,248 @@ class DashboardPage extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE0F2FE),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: const Icon(
-                            Icons.tune_rounded,
-                            color: Color(0xFF0369A1),
-                          ),
+                        Row(
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE0F2FE),
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: const Icon(
+                                Icons.tune_rounded,
+                                color: Color(0xFF0369A1),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Adjust monthly budget',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF172036),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Set a target that matches your current spending pace.',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: const Color(0xFF64748B),
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Adjust monthly budget',
+                                'Current month snapshot',
                                 style: GoogleFonts.outfit(
-                                  fontSize: 24,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                   color: const Color(0xFF172036),
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Set a target that matches your current spending pace.',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: const Color(0xFF64748B),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _BudgetPreviewTile(
+                                      label: 'Spent so far',
+                                      value: _formatCurrency(
+                                        notifier.spentThisMonth,
+                                      ),
+                                      valueColor: const Color(0xFF9A3412),
                                     ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Current month snapshot',
-                            style: GoogleFonts.outfit(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF172036),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _BudgetPreviewTile(
-                                  label: 'Spent so far',
-                                  value: _formatCurrency(notifier.spentThisMonth),
-                                  valueColor: const Color(0xFF9A3412),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _BudgetPreviewTile(
-                                  label: 'Current target',
-                                  value: _formatCurrency(notifier.monthlyBudget),
-                                  valueColor: const Color(0xFF0369A1),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    TextField(
-                      controller: controller,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        final parsed = int.tryParse(value.trim());
-                        setSheetState(() {
-                          if (parsed == null || parsed <= 0) {
-                            errorText = 'Enter a valid positive amount.';
-                            return;
-                          }
-                          previewBudget = parsed;
-                          errorText = null;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Monthly budget',
-                        prefixText: 'Rs ',
-                        hintText: 'Enter target budget',
-                        errorText: errorText,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Quick presets',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: const Color(0xFF475569),
-                            fontWeight: FontWeight.w700,
-                          ),
-                    ),
-                    const SizedBox(height: 10),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: presetBudgets.map((preset) {
-                          final selected = preset == previewBudget;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: ChoiceChip(
-                              label: Text(_formatCurrency(preset)),
-                              selected: selected,
-                              onSelected: (_) {
-                                controller.text = preset.toString();
-                                setSheetState(() {
-                                  previewBudget = preset;
-                                  errorText = null;
-                                });
-                              },
-                              selectedColor: const Color(0xFFCCFBF1),
-                              backgroundColor: Colors.white,
-                              side: BorderSide.none,
-                              labelStyle: TextStyle(
-                                color: selected
-                                    ? const Color(0xFF115E59)
-                                    : const Color(0xFF475569),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: previewRemaining < 0
-                            ? const Color(0xFFFEE2E2)
-                            : const Color(0xFFECFDF5),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Preview',
-                            style: GoogleFonts.outfit(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF172036),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _BudgetPreviewTile(
-                                  label: previewRemaining < 0
-                                      ? 'You would be over'
-                                      : 'You would have left',
-                                  value: _formatCurrency(
-                                    previewRemaining < 0
-                                        ? previewOverBudget
-                                        : previewRemaining,
                                   ),
-                                  valueColor: previewRemaining < 0
-                                      ? const Color(0xFFB91C1C)
-                                      : const Color(0xFF047857),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _BudgetPreviewTile(
-                                  label: 'Daily allowance',
-                                  value: _formatCurrency(previewDailyAllowance),
-                                  valueColor: const Color(0xFF6D28D9),
-                                ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _BudgetPreviewTile(
+                                      label: 'Current target',
+                                      value: _formatCurrency(
+                                        notifier.monthlyBudget,
+                                      ),
+                                      valueColor: const Color(0xFF0369A1),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => navigator.pop(),
-                            child: const Text('Cancel'),
-                          ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: () {
-                              final value = int.tryParse(controller.text.trim());
-                              if (value == null || value <= 0) {
-                                setSheetState(() {
-                                  errorText = 'Enter a valid positive amount.';
-                                });
+                        const SizedBox(height: 18),
+                        TextField(
+                          controller: controller,
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            final parsed = int.tryParse(value.trim());
+                            setSheetState(() {
+                              if (parsed == null || parsed <= 0) {
+                                errorText = 'Enter a valid positive amount.';
                                 return;
                               }
-
-                              navigator.pop(value);
-                            },
-                            style: FilledButton.styleFrom(
-                              backgroundColor: const Color(0xFF0F766E),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                            child: const Text('Save budget'),
+                              previewBudget = parsed;
+                              errorText = null;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'Monthly budget',
+                            prefixText: 'Rs ',
+                            hintText: 'Enter target budget',
+                            errorText: errorText,
                           ),
                         ),
-                      ],
-                    ),
+                        const SizedBox(height: 14),
+                        Text(
+                          'Quick presets',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: const Color(0xFF475569),
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                        const SizedBox(height: 10),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: presetBudgets.map((preset) {
+                              final selected = preset == previewBudget;
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: ChoiceChip(
+                                  label: Text(_formatCurrency(preset)),
+                                  selected: selected,
+                                  onSelected: (_) {
+                                    controller.text = preset.toString();
+                                    setSheetState(() {
+                                      previewBudget = preset;
+                                      errorText = null;
+                                    });
+                                  },
+                                  selectedColor: const Color(0xFFCCFBF1),
+                                  backgroundColor: Colors.white,
+                                  side: BorderSide.none,
+                                  labelStyle: TextStyle(
+                                    color: selected
+                                        ? const Color(0xFF115E59)
+                                        : const Color(0xFF475569),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: previewRemaining < 0
+                                ? const Color(0xFFFEE2E2)
+                                : const Color(0xFFECFDF5),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Preview',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF172036),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _BudgetPreviewTile(
+                                      label: previewRemaining < 0
+                                          ? 'You would be over'
+                                          : 'You would have left',
+                                      value: _formatCurrency(
+                                        previewRemaining < 0
+                                            ? previewOverBudget
+                                            : previewRemaining,
+                                      ),
+                                      valueColor: previewRemaining < 0
+                                          ? const Color(0xFFB91C1C)
+                                          : const Color(0xFF047857),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _BudgetPreviewTile(
+                                      label: 'Daily allowance',
+                                      value: _formatCurrency(
+                                        previewDailyAllowance,
+                                      ),
+                                      valueColor: const Color(0xFF6D28D9),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () =>
+                                    Navigator.of(sheetContext).pop(),
+                                child: const Text('Cancel'),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FilledButton(
+                                onPressed: () {
+                                  final value = int.tryParse(
+                                    controller.text.trim(),
+                                  );
+                                  if (value == null || value <= 0) {
+                                    setSheetState(() {
+                                      errorText =
+                                          'Enter a valid positive amount.';
+                                    });
+                                    return;
+                                  }
+
+                                  Navigator.of(sheetContext).pop(value);
+                                },
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: const Color(0xFF0F766E),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                ),
+                                child: const Text('Save budget'),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -623,16 +663,16 @@ class DashboardPage extends StatelessWidget {
     );
     controller.dispose();
 
-    if (updatedBudget != null) {
-      notifier.setMonthlyBudget(updatedBudget);
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            'Monthly budget updated to ${_formatCurrency(updatedBudget)}.',
-          ),
+    if (!context.mounted || updatedBudget == null) return;
+
+    notifier.setMonthlyBudget(updatedBudget);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Monthly budget updated to ${_formatCurrency(updatedBudget)}.',
         ),
-      );
-    }
+      ),
+    );
   }
 
   int _calculateDailyAllowance(int remainingBudget) {
@@ -658,11 +698,7 @@ class _HeroBalanceCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0F172A),
-            Color(0xFF0F766E),
-            Color(0xFF14B8A6),
-          ],
+          colors: [Color(0xFF0F172A), Color(0xFF0F766E), Color(0xFF14B8A6)],
         ),
         boxShadow: const [
           BoxShadow(
@@ -678,7 +714,10 @@ class _HeroBalanceCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.14),
                   borderRadius: BorderRadius.circular(999),
@@ -756,10 +795,7 @@ class _BalanceStat extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(color: Color(0xFFE2E8F0)),
-          ),
+          Text(label, style: const TextStyle(color: Color(0xFFE2E8F0))),
           const SizedBox(height: 8),
           Text(
             value,
@@ -811,9 +847,9 @@ class _InsightTile extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             title,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: const Color(0xFF64748B),
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: const Color(0xFF64748B)),
           ),
           const SizedBox(height: 6),
           Text(
@@ -875,8 +911,8 @@ class _SectionCard extends StatelessWidget {
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: const Color(0xFF667085),
-                          ),
+                        color: const Color(0xFF667085),
+                      ),
                     ),
                   ],
                 ),
@@ -956,9 +992,9 @@ class _BudgetPreviewTile extends StatelessWidget {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: const Color(0xFF64748B),
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: const Color(0xFF64748B)),
           ),
           const SizedBox(height: 6),
           Text(
@@ -991,9 +1027,9 @@ class _EmptyState extends StatelessWidget {
       ),
       child: Text(
         message,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF64748B),
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF64748B)),
       ),
     );
   }
@@ -1001,7 +1037,8 @@ class _EmptyState extends StatelessWidget {
 
 String _formatCurrency(int amount) => 'Rs ${amount.toString()}';
 
-String _formatSignedCurrency(int amount) => '${amount >= 0 ? '+' : '-'}${_formatCurrency(amount.abs())}';
+String _formatSignedCurrency(int amount) =>
+    '${amount >= 0 ? '+' : '-'}${_formatCurrency(amount.abs())}';
 
 String _formatDate(DateTime date) {
   const months = [

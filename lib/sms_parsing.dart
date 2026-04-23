@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:saad_project_2/api_service.dart';
-import 'package:saad_project_2/homePage.dart';
+import 'package:saad_project_2/home_page.dart';
 import 'package:telephony/telephony.dart';
 
 import 'transaction_notifier.dart';
@@ -19,6 +19,7 @@ class SmsParsing extends StatefulWidget {
 
 class _SmsParsingState extends State<SmsParsing> {
   final Telephony telephony = Telephony.instance;
+  bool _isListening = false;
 
   final List<String> financialKeywords = [
     'debited',
@@ -84,8 +85,10 @@ class _SmsParsingState extends State<SmsParsing> {
           final result = await ApiService.predict(sms);
           category = result['category'] ?? 'Others';
           typeString = result['type'] ?? 'debit';
-        } catch (_) {
-          debugPrint('Prediction API unavailable. Using fallback classification.');
+        } catch (error) {
+          debugPrint(
+            'Prediction API unavailable. Using fallback classification. Error: $error',
+          );
         }
 
         final type = typeString == 'credit'
@@ -124,7 +127,11 @@ class _SmsParsingState extends State<SmsParsing> {
   @override
   void initState() {
     super.initState();
-    _initSmsListener();
+
+    if(!_isListening) {
+      _isListening = true;
+      _initSmsListener();
+    }
   }
 
   @override

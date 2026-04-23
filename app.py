@@ -33,10 +33,18 @@ def detect_type(text):
     return "unknown"
 
 
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"}), 200
+
+
 @app.route("/predict", methods=["POST"])
 def predict():
-    data = request.json
-    text = data.get("sms", "")
+    data = request.get_json(silent=True) or {}
+    text = str(data.get("sms", "")).strip()
+
+    if not text:
+        return jsonify({"error": "Missing sms field"}), 400
 
     # Rule-based first
     rule = rule_based_category(text)
@@ -56,4 +64,4 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, threaded=True)

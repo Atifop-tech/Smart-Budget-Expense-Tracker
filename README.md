@@ -1,17 +1,46 @@
-# Smart-Budget-Expense-Tracker
+# Smart Budget Expense Tracker
 
-A new Flutter project.
+AI-powered personal finance and expense management platform that helps users track spending, analyze budgets, and visualize financial insights in real time.
 
-## Getting Started
+## 🚀 Features
 
-This project is a starting point for a Flutter application.
+- Expense Tracking
+- Budget Planning
+- AI Insights
+- Monthly Analytics
+- Category-based Spending
+- Charts & Visualization
+- Authentication
+- Responsive UI
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Tech Stack
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Frontend:
+- React.js
+- Tailwind CSS
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Backend:
+- Node.js
+- Express.js
+
+Database:
+- MongoDB
+
+Other:
+- Chart.js
+- JWT Authentication
+
+## 📸 Screenshots
+
+(Add images here)
+
+## 🧠 System Architecture
+
+(Add architecture diagram)
+
+## ⚙️ Installation
+
+```bash
+git clone ...
+npm install
+npm start
